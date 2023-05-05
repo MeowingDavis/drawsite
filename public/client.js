@@ -75,7 +75,7 @@ const ctx = cnv.getContext (`2d`)
 draw_frame ()
 
 function draw_frame () {
-   ctx.fillStyle = `offwhite`
+   ctx.fillStyle = `turquoise`
    ctx.fillRect (0, 0, cnv.width, cnv.height)
 
    squares.forEach (s => {
