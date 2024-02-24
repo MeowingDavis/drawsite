@@ -1,7 +1,7 @@
 let id = false;
 let is_drawing = false;
-let lastX = 0;
-let lastY = 0;
+const squares = [];
+const SQUARE_SIZE = 10; // Define the size of the square
 
 // const socket = new WebSocket (`ws://localhost/`)
 const socket = new WebSocket('wss://draw-with-friends.deno.dev/');
@@ -18,6 +18,10 @@ socket.onmessage = e => {
         id: () => {
             id = msg.content;
             console.log(`id is ${id}`);
+        },
+        add_square: () => {
+            squares.push(msg.content);
+            draw_frame(); // Redraw the canvas when a new square is added
         }
     };
 
@@ -45,8 +49,6 @@ cnv.onpointerdown = e => {
     socket.send(JSON.stringify(msg));
 
     is_drawing = true;
-    lastX = e.x / cnv.width;
-    lastY = e.y / cnv.height;
 };
 
 cnv.onpointerup = e => {
@@ -55,16 +57,11 @@ cnv.onpointerup = e => {
 
 cnv.onpointermove = e => {
     if (is_drawing) {
-        const currentX = e.x / cnv.width;
-        const currentY = e.y / cnv.height;
-        draw_line(lastX, lastY, currentX, currentY);
-        lastX = currentX;
-        lastY = currentY;
         const msg = {
             method: 'click_location',
             content: {
-                x: currentX,
-                y: currentY
+                x: e.x / cnv.width,
+                y: e.y / cnv.height,
             }
         };
         socket.send(JSON.stringify(msg));
@@ -73,12 +70,16 @@ cnv.onpointermove = e => {
 
 const ctx = cnv.getContext('2d');
 
-function draw_line(startX, startY, endX, endY) {
+function draw_frame() {
     ctx.clearRect(0, 0, cnv.width, cnv.height); // Clear the canvas
-    ctx.beginPath();
-    ctx.moveTo(startX * cnv.width, startY * cnv.height);
-    ctx.lineTo(endX * cnv.width, endY * cnv.height);
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+
+    // Draw squares
+    ctx.fillStyle = 'black';
+    squares.forEach(square => {
+        const x = square.x * cnv.width - SQUARE_SIZE / 2;
+        const y = square.y * cnv.height - SQUARE_SIZE / 2;
+        ctx.fillRect(x, y, SQUARE_SIZE, SQUARE_SIZE);
+    });
 }
+
+draw_frame(); // Draw initial frame
