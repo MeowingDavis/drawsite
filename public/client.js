@@ -74,16 +74,26 @@ const ctx = cnv.getContext (`2d`)
 
 draw_frame ()
 
-function draw_frame () {
-   ctx.fillStyle = `turquoise`
-   ctx.fillRect (0, 0, cnv.width, cnv.height)
+function draw_frame() {
+  ctx.clearRect(0, 0, cnv.width, cnv.height); // Clear the canvas
 
-   squares.forEach (s => {
-      ctx.fillStyle = `deeppink`
-      const x = s.x * cnv.width  - 10
-      const y = s.y * cnv.height - 10
-      ctx.fillRect (x, y, 20, 20)
-   })
+  // Draw previously drawn lines
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < squares.length - 1; i++) {
+      const startPoint = {
+          x: squares[i].x * cnv.width,
+          y: squares[i].y * cnv.height
+      };
+      const endPoint = {
+          x: squares[i + 1].x * cnv.width,
+          y: squares[i + 1].y * cnv.height
+      };
+      ctx.moveTo(startPoint.x, startPoint.y);
+      ctx.lineTo(endPoint.x, endPoint.y);
+  }
+  ctx.stroke();
 
-   requestAnimationFrame (draw_frame)
+  requestAnimationFrame(draw_frame);
 }
