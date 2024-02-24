@@ -1,9 +1,8 @@
 let id = false;
 let is_drawing = false;
 let selectedColor = 'red'; // Default color
-let startPoint = { x: 0, y: 0 };
-let endPoint = { x: 0, y: 0 };
 let lineThickness = 2; // Default line thickness
+let lastPoint = null; // Keep track of the last drawn point
 
 const shapes = [];
 
@@ -27,6 +26,7 @@ socket.onmessage = (e) => {
     add_shape: () => {
       console.log(`adding a shape!`);
       shapes.push(msg.content);
+      draw_frame(); // Draw the newly added shape
     },
   };
 
@@ -80,31 +80,27 @@ cnv.width = innerWidth;
 cnv.height = innerHeight;
 container.appendChild(cnv);
 
-cnv.onpointerdown = (e) => {
-  startPoint = {
-    x: e.offsetX / cnv.width,
-    y: e.offsetY / cnv.height,
-  };
+const ctx = cnv.getContext(`2d`);
 
+cnv.onpointerdown = (e) => {
   is_drawing = true;
+  lastPoint = { x: e.offsetX / cnv.width, y: e.offsetY / cnv.height };
 };
 
 cnv.onpointerup = (e) => {
   is_drawing = false;
+  lastPoint = null;
 };
 
 cnv.onpointermove = (e) => {
   if (is_drawing) {
-    endPoint = {
-      x: e.offsetX / cnv.width,
-      y: e.offsetY / cnv.height,
-    };
+    const currentPoint = { x: e.offsetX / cnv.width, y: e.offsetY / cnv.height };
 
     const msg = {
       method: `draw_line`,
       content: {
-        start: startPoint,
-        end: endPoint,
+        start: lastPoint,
+        end: currentPoint,
         color: selectedColor,
         thickness: lineThickness,
       },
@@ -112,15 +108,12 @@ cnv.onpointermove = (e) => {
 
     socket.send(JSON.stringify(msg));
 
-    // Update the start point for the next line segment
-    startPoint = endPoint;
-
     shapes.push(msg.content); // Add the current line segment to the array for immediate drawing
     draw_frame(); // Draw the line immediately
+
+    lastPoint = currentPoint;
   }
 };
-
-const ctx = cnv.getContext(`2d`);
 
 function draw_frame() {
   ctx.clearRect(0, 0, cnv.width, cnv.height); // Clear the canvas before redrawing
@@ -131,12 +124,10 @@ function draw_frame() {
   shapes.forEach((s) => {
     ctx.strokeStyle = s.color;
     ctx.lineWidth = s.thickness;
+    ctx.lineCap = 'round'; // Make the line endings rounded
     ctx.beginPath();
     ctx.moveTo(s.start.x * cnv.width, s.start.y * cnv.height);
     ctx.lineTo(s.end.x * cnv.width, s.end.y * cnv.height);
     ctx.stroke();
   });
 }
-
-// Initial drawing of existing shapes
-draw_frame();
