@@ -91,7 +91,7 @@ function draw_frame() {
           y: squares[i + 1].y * cnv.height
       };
       ctx.moveTo(startPoint.x, startPoint.y);
-      ctx.lineTo(endPoint.x, endPoint.y);
+      // ctx.lineTo(endPoint.x, endPoint.y);
   }
   ctx.stroke();
 
