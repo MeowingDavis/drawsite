@@ -1,6 +1,7 @@
 let id = false;
 let is_drawing = false;
 const squares = [];
+const SQUARE_SIZE = 10; // Define the size of the square
 
 // const socket = new WebSocket (`ws://localhost/`)
 const socket = new WebSocket('wss://draw-with-friends.deno.dev/');
@@ -74,12 +75,11 @@ function draw_frame() {
 
     // Draw squares
     ctx.fillStyle = 'black';
-    for (const square of squares) {
-        const x = square.x * cnv.width;
-        const y = square.y * cnv.height;
-        const size = 20; // Adjust the size of the square as needed
-        ctx.fillRect(x - size / 2, y - size / 2, size, size);
-    }
+    squares.forEach(square => {
+        const x = square.x * cnv.width - SQUARE_SIZE / 2;
+        const y = square.y * cnv.height - SQUARE_SIZE / 2;
+        ctx.fillRect(x, y, SQUARE_SIZE, SQUARE_SIZE);
+    });
 }
 
 draw_frame(); // Draw initial frame
