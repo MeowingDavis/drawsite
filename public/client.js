@@ -7,7 +7,7 @@ let endPoint = { x: 0, y: 0 };
 const shapes = [];
 
 // const socket = new WebSocket (`ws://localhost/`)
-const socket = new WebSocket('https://draw-with-friends.deno.dev/');
+const socket = new WebSocket('ws://draw-with-friends.deno.dev/');
 
 socket.onopen = () => console.log(`client: websocket opened!`);
 socket.onclose = () => console.log(`client: websocket closed!`);
